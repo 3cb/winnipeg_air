@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -14,10 +15,39 @@ import (
 
 func startPolling(db *bolt.DB, pool *ssc.SocketPool) {
 	ticker := time.NewTicker(time.Minute * 5)
+	loc, _ := time.LoadLocation("America/Winnipeg")
+	date := strings.Split(fmt.Sprint(time.Now().In(loc)), " ")[0]
 
+	readings, err := getReadings()
+	if err != nil {
+		log.Fatalf("Unable to get initial air quality readings: %v", err)
+	}
+
+	msg := serialize(readings, date)
+	err = updateDB(db, msg, date)
+	if err != nil {
+		log.Fatalf("Error saving air quality readings to database: %v", err)
+	}
+	pool.Pipes.InboundBytes <- ssc.Data{Type: 2, Payload: msg}
+
+	for {
+		<-ticker.C
+		date := strings.Split(fmt.Sprint(time.Now().In(loc)), " ")[0]
+
+		readings, err := getReadings()
+		if err != nil {
+			log.Printf("Unable to update air quality readings: %v", err)
+		}
+
+		msg := serialize(readings, date)
+		err = updateDB(db, msg, date)
+		if err != nil {
+			log.Fatalf("Error saving air quality readings to database: %v", err)
+		}
+		pool.Pipes.InboundBytes <- ssc.Data{Type: 2, Payload: msg}
+	}
 }
 
-// https://data.winnipeg.ca/resource/f5p2-7r36.json
 func getReadings() ([]Reading, error) {
 	air := []Reading{}
 
