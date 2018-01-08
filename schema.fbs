@@ -1,0 +1,19 @@
+namespace wair;
+
+table Message {
+    date:string;
+    readings:[Reading];
+}
+
+table Reading {
+    coordinates:[float];
+    observationid:string;
+    observationtime:string;
+    thingid:string;
+    locationname:string;
+    measurementtype:string;
+    measurementvalue:string;
+    measurementunit:string;
+}
+
+root_type Message;
