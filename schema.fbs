@@ -6,7 +6,7 @@ table Message {
 }
 
 table Reading {
-    coordinates:[float];
+    coordinates:[double];
     observationid:string;
     observationtime:string;
     thingid:string;
