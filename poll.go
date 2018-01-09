@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -52,8 +53,8 @@ func getReadings() ([]Reading, error) {
 	air := []Reading{}
 
 	t1, t2 := getDate()
-	api := "https://data.winnipeg.ca/resource/f5p2-7r36.json"
-	queryString := "?where=observationtime between '" + t1 + "' and '" + t2 + "'"
+	api := "https://data.winnipeg.ca/resource/f5p2-7r36.json?$where="
+	queryString := url.QueryEscape("observationtime between '" + t1 + "' and '" + t2 + "'")
 	resp, err := http.Get(api + queryString)
 	if err != nil {
 		return nil, err
