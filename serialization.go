@@ -51,5 +51,5 @@ func serialize(data []Reading, date string) []byte {
 	builder.Finish(msg)
 	buf := builder.FinishedBytes()
 
-	return buf, nil
+	return buf
 }
